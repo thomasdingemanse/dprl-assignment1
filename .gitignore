@@ -130,3 +130,8 @@ dmypy.json
 
 # Output CSVs
 *.csv
+
+# IDE configuration files
+.vscode
+.vs
+.idea
