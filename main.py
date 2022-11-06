@@ -1,77 +1,91 @@
 import numpy as np
 import random
 
-# T     = Time periods
-# x_max = max inventory
-# d     = demand
-# h     = holding cost
-# K     = order cost
-# V     = value by time and state
-# alpha = optimal policy by time and state
-# Q     = vector with value by action
+class StochasticInventoryProblem:
+    def __init__(self, T = 1000):
+        # Number of time steps (days)
+        self.T = T
 
-# Number of time steps (days)
-T = 1000
+        # State space
+        self.x_max = self.T
 
-# State space
-x_max = T
+        # Probability of demand = 1 by time step
+        self.P = [_ * 0.001 for _ in range(T)]
 
-# Probability of demand = 1 by time step
-P = [_ * 0.001 for _ in range(T)]
+        # Simulated demand
+        self.D = [int(random.uniform(0, 1) < self.P[_]) for _ in range(T)]
 
-# Simulated demand
-D = [int(random.uniform(0, 1)< P[_]) for _ in range(T)]
+        # Holding cost
+        self.h = 0.01
 
-# Holding costs
-h = 0.01
+        # Order cost
+        self.K = 10
 
-# Order cost
-K = 10
+        # Dynamic buying price and static selling price
+        self.selling_price = 20
+        self.purchase_cost = lambda _ : 10 if _ <= 500 else 15
 
-selling_price = 20
-purchase_cost = lambda _ : 10 if _ <= 500 else 15
+        # Value for each time and state
+        self.V = np.zeros((self.T, self.x_max))
 
-# Value by time and state
-V = np.zeros((T, x_max))
+        # Optimal policy for each time and state
+        self.alpha = np.zeros((self.T, self.x_max))
 
-# Optimal policy by time and state
-alpha = np.zeros((T, x_max))
+        # Value for each action at a given time and state
+        self.Q = np.zeros((self.x_max + 1))
 
-# Value by action at a given time and state
-Q = np.zeros((x_max))
+        # The value at the last time step is the value of the inventory
+        self.V[0:,T-1] = [self.h * _  for _ in range(self.x_max)]
 
-# Set value for last time step (value = items sold * price)
-V[0:,T-1] = [h * _  for _ in range(x_max)]
+    # Reset values to run again with different parameters
+    def reset(self):
+        self.__init__(T = self.T)
 
-# For each time step, going backwards from t = T to t = 0
-for t in reversed(range(0, T-1)):
-    # For each state (number of items in inventory)
-    for x in range(0, x_max):
-        # Determine the action space A
-        a_min = max(D[t]-x, 0)
-        a_max = x_max - x + D[t]
+    # Apply dynamic programming to find the optimal policy and its value
+    def find_optimal_policy(self):
+        # For each time step, going backwards from t = T to t = 0
+        for t in reversed(range(0, self.T - 1)):
+            # For each state (number of items in inventory)
+            for x in range(0, self.x_max):
+                # Determine the action space A
+                a_min = max(self.D[t] - x, 0)
+                a_max = self.x_max - x + self.D[t]
 
-        # For each legal action (number of items ordered)
-        for a in range(a_min, a_max):
-            # Calculate value for the given action
-            holding_costs = x * h
+                # For each legal action (number of items ordered)
+                for a in range(a_min, a_max):
+                    # Calculate value for the given action
+                    holding_costs = x * self.h
 
-            # No purchases possible after time 900
-            order_costs = K * int(a > 0) if t <= 900 else 0
-            
-            # t + 1 = next time interval (looking forward)
-            Q[a] = holding_costs + order_costs + V[x - D[t] + a, t + 1]
-        
-        # Initialize current best value and optimal policy
-        V[x,t] = Q[a_min]
-        alpha[x,t] = a_min
-        
-        # Choose best action and optimal policy for this state and time step
-        for a in range(a_min, a_max):
-            if Q[a] < V[x,t]:
-                alpha[x,t] = a
-                V[x,t] = Q[a]
+                    # No purchases possible after time 900
+                    order_costs = self.K * int(a > 0) if t <= 900 else 0
 
-# Export the value function and optimal policy
-np.savetxt("actions.csv", V, fmt='%d', delimiter=",")
-np.savetxt("optimal.csv", alpha, fmt='%d', delimiter=",")
+                    # t + 1 = next time step (looking forward)
+                    next_value = self.V[x - self.D[t] + a, t + 1]
+                    
+                    # Calculate value for this time step
+                    self.Q[a] = holding_costs + order_costs + next_value
+                
+                # Initialize current best value and optimal policy
+                self.V[x,t] = self.Q[a_min]
+                self.alpha[x,t] = a_min
+                
+                # Choose best action and optimal policy for this state and time step
+                for a in range(a_min, a_max):
+                    if self.Q[a] < self.V[x,t]:
+                        self.alpha[x,t] = a
+                        self.V[x,t] = self.Q[a]
+
+    # Perform n simulations of the demand over time
+    def simulate(self, n = 10):
+        raise NotImplementedError()
+
+    # Export the value function and optimal policy
+    def export(self):
+        np.savetxt("value.csv", self.V, fmt='%d', delimiter=",")
+        np.savetxt("policy.csv", self.alpha, fmt='%d', delimiter=",")
+
+if __name__ == "__main__":
+    s = StochasticInventoryProblem(T = 10)
+    s.find_optimal_policy()
+    s.export()
+    # s.simulate(n = 10)
