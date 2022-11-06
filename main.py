@@ -64,5 +64,5 @@ for t in reversed(range(1, T-1)):
                 alpha[x,t] = a
                 V[x,t] = Q[a]
 
-print(V[0:,5:10].astype(int))
-print(alpha[0:,5:10].astype(int))
+np.savetxt("actions.csv", V, fmt='%d', delimiter=",")
+np.savetxt("optimal.csv", alpha, fmt='%d', delimiter=",")
