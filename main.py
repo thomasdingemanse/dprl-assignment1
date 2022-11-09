@@ -51,6 +51,10 @@ class StochasticInventoryProblem:
                 a_min = max(self.D[t] - x, 0)
                 a_max = self.x_max - x + self.D[t]
 
+                # Buy nothing starting from t=900
+                if t >= 900:
+                    a_max = 1
+
                 # For each legal action (number of items ordered)
                 for a in range(a_min, a_max):
                     # Calculate value for the given action
