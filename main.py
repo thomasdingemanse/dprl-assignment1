@@ -26,10 +26,10 @@ class StochasticInventoryProblem:
         self.purchase_cost = lambda _ : 10 if _ <= 500 else 15
 
         # Value for each time and state
-        self.V = np.zeros((self.T, self.x_max))
+        self.V = np.zeros((self.x_max + 1, self.T))
 
         # Optimal policy for each time and state
-        self.alpha = np.zeros((self.T, self.x_max))
+        self.alpha = np.zeros((self.x_max + 1, self.T))
 
         # Value for each action at a given time and state
         self.Q = np.zeros((self.x_max + 1))
@@ -43,10 +43,10 @@ class StochasticInventoryProblem:
 
     # Apply dynamic programming to find the optimal policy and its value
     def find_optimal_policy(self):
-        # For each time step, going backwards from t = T to t = 0
+        # For each time step, going backwards from t = T - 1 to t = 0
         for t in reversed(range(0, self.T - 1)):
             # For each state (number of items in inventory)
-            for x in range(0, self.x_max):
+            for x in range(0, self.x_max + 1):
                 # Determine the action space A
                 a_min = max(self.D[t] - x, 0)
                 a_max = self.x_max - x + self.D[t]
