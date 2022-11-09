@@ -35,7 +35,7 @@ class StochasticInventoryProblem:
         self.Q = np.zeros((self.x_max + 1))
 
         # The value at the last time step is the value of the inventory
-        self.V[0:,T-1] = [self.h * _  for _ in range(self.x_max)]
+        self.V[0:self.x_max, self.T - 1] = [self.h * _  for _ in range(self.x_max)]
 
     # Reset values to run again with different parameters
     def reset(self):
@@ -81,7 +81,7 @@ class StochasticInventoryProblem:
                 self.alpha[x,t] = a_min
                 
                 # Choose best action and optimal policy for this state and time step
-                for a in range(a_min, a_max):
+                for a in range(a_min + 1, a_max):
                     if self.Q[a] < self.V[x,t]:
                         self.alpha[x,t] = a
                         self.V[x,t] = self.Q[a]
