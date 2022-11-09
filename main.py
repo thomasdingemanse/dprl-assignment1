@@ -57,13 +57,20 @@ class StochasticInventoryProblem:
                     holding_costs = x * self.h
 
                     # No purchases possible after time 900
-                    order_costs = self.K * int(a > 0) if t <= 900 else 0
+                    order_costs = self.K * int(a > 0)
 
                     # t + 1 = next time step (looking forward)
                     next_value = self.V[x - self.D[t] + a, t + 1]
+
+                    # earnings (selling price * demand if you have inventory)
+                    earnings = self.selling_price * self.D[t] if x > 0 else 0
+
+                    # acquire cost
+                    # No purchases possible after time 900
+                    acquire_cost = self.purchase_cost(t) * a
                     
                     # Calculate value for this time step
-                    self.Q[a] = holding_costs + order_costs + next_value
+                    self.Q[a] = holding_costs + order_costs + next_value + acquire_cost - earnings
                 
                 # Initialize current best value and optimal policy
                 self.V[x,t] = self.Q[a_min]
