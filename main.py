@@ -45,6 +45,8 @@ class StochasticInventoryProblem:
     def find_optimal_policy(self):
         # For each time step, going backwards from t = T - 1 to t = 0
         for t in reversed(range(0, self.T - 1)):
+            print(f"[{t}/{self.T - 2}]")
+            
             # For each state (number of items in inventory)
             for x in range(0, self.x_max + 1):
                 # Determine the action space A
@@ -57,6 +59,8 @@ class StochasticInventoryProblem:
 
                 # For each legal action (number of items ordered)
                 for a in range(a_min, a_max):
+                    # print("state: {state} action: {action} next t: {t}".format(state=x, action=a, t=t + 1))
+
                     # Calculate value for the given action
                     holding_costs = x * self.h
 
