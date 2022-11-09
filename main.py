@@ -2,12 +2,12 @@ import numpy as np
 import random
 
 class StochasticInventoryProblem:
-    def __init__(self, T = 1000):
+    def __init__(self, T = 1000, x_max = 100):
         # Number of time steps (days)
         self.T = T
 
         # State space
-        self.x_max = self.T
+        self.x_max = x_max
 
         # Probability of demand = 1 by time step
         self.P = [_ * 0.001 for _ in range(T)]
@@ -85,7 +85,7 @@ class StochasticInventoryProblem:
         np.savetxt("policy.csv", self.alpha, fmt='%d', delimiter=",")
 
 if __name__ == "__main__":
-    s = StochasticInventoryProblem(T = 10)
+    s = StochasticInventoryProblem()
     s.find_optimal_policy()
     s.export()
     # s.simulate(n = 10)
