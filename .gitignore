@@ -129,7 +129,7 @@ dmypy.json
 .pyre/
 
 # Output CSVs
-*.csv
+# *.csv
 
 # IDE configuration files
 .vscode
