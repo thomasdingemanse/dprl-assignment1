@@ -61,27 +61,21 @@ class StochasticInventoryProblem:
 
                 # For each legal action (number of items ordered)
                 for a in range(a_min, a_max):
-                    # print(
-                    #     "state: {state} action: {action} next t: {t}".format(
-                    #         state=x, action=a, t=t + 1
-                    #     )
-                    # )
-
-                    # Calculate value for the given action
+                    # current stock * holding cost
                     holding_costs = x * self.h
 
-                    # No purchases possible after time 900
+                    # if action do order_costs
                     order_costs = self.K * int(a > 0)
 
                     # t + 1 = next time step (looking forward)
                     next_value = self.V[x - self.D[t] + a, t + 1]
 
+                    # purchase_cost = (t<500: 10, t> 500: 15)
+                    # cost to purchase new stock * action
+                    acquire_cost = self.purchase_cost(t) * a
+
                     # earnings (selling price * demand if you have inventory)
                     earnings = self.selling_price * self.D[t] if x > 0 else 0
-
-                    # acquire cost
-                    # No purchases possible after time 900
-                    acquire_cost = self.purchase_cost(t) * a
 
                     # Calculate value for this time step
                     self.Q[a] = (
